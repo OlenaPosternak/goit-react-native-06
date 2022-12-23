@@ -63,6 +63,16 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       }
       let locationOfPhoto = await Location.getCurrentPositionAsync({});
       console.log(`locationOfPhoto`, locationOfPhoto);
+      let coords ={
+        latitude:locationOfPhoto.coords.latitude,
+        longitude: locationOfPhoto.coords.longitude
+        
+      }
+    //   ??
+
+      let address = await Location.reverseGeocodeAsync(coords);
+      console.log(`address`,address);
+
 
       setLocation(locationOfPhoto);
     })();

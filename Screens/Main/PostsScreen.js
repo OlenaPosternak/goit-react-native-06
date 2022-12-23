@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import { collection, doc, query, getDocs } from "firebase/firestore";
+import { collection, query, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 
 import { authSignOutUser } from "../../redux/auth/authOperations";
@@ -18,9 +18,8 @@ import LogOutIcon from "../../assets/img/log-out.svg";
 import Shape from "../../assets/img/Shape.svg";
 import Location from "../../assets/img/map-pin.svg";
 
-const PostsScreen = ({ onLayout, navigation, route }) => {
+const PostsScreen = ({ onLayout, navigation }) => {
   const [postsInfo, setPostsInfo] = useState([]);
-  console.log(`postsInfo`, postsInfo);
   const dispatch = useDispatch();
 
   const signOut = () => {
@@ -28,20 +27,9 @@ const PostsScreen = ({ onLayout, navigation, route }) => {
   };
 
   const getAllPosts = async () => {
-    //     const querySnapshot = await getDocs(collection(db, "posts"));
-
-    //     setPostsInfo(
-    //       querySnapshot.docs.map((doc) => {
-    //         ({ ...doc.data(), id: doc.id });
-    //         console.log(`${doc.id} => ${doc.data()}`);
-    //       })
-    //     );
-    //   };
-
     const q = query(collection(db, "posts"));
 
     const querySnapshot = await getDocs(q);
-    // console.log(JSON.stringify(querySnapshot.docs.map((doc)=>({ ...doc.data(), id: doc.id }))));
     setPostsInfo(
       querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
     );
@@ -49,7 +37,7 @@ const PostsScreen = ({ onLayout, navigation, route }) => {
 
   useEffect(() => {
     getAllPosts();
-  }, []);
+  }, [postsInfo]);
 
   const renderItem = ({ item }) => (
     <View style={styles.cardInfo}>
