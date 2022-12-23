@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   Image,
-  Item,
   FlatList,
   Text,
-  ScrollView,
   View,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
 
-import {authSignOutUser} from '../../redux/auth/authOperations'
+import { collection, doc, query, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
 
+import { authSignOutUser } from "../../redux/auth/authOperations";
 
 import LogOutIcon from "../../assets/img/log-out.svg";
 import Shape from "../../assets/img/Shape.svg";
@@ -20,18 +20,36 @@ import Location from "../../assets/img/map-pin.svg";
 
 const PostsScreen = ({ onLayout, navigation, route }) => {
   const [postsInfo, setPostsInfo] = useState([]);
+  console.log(`postsInfo`, postsInfo);
   const dispatch = useDispatch();
 
   const signOut = () => {
     dispatch(authSignOutUser());
   };
 
+  const getAllPosts = async () => {
+    //     const querySnapshot = await getDocs(collection(db, "posts"));
+
+    //     setPostsInfo(
+    //       querySnapshot.docs.map((doc) => {
+    //         ({ ...doc.data(), id: doc.id });
+    //         console.log(`${doc.id} => ${doc.data()}`);
+    //       })
+    //     );
+    //   };
+
+    const q = query(collection(db, "posts"));
+
+    const querySnapshot = await getDocs(q);
+    // console.log(JSON.stringify(querySnapshot.docs.map((doc)=>({ ...doc.data(), id: doc.id }))));
+    setPostsInfo(
+      querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+    );
+  };
 
   useEffect(() => {
-    if (route.params) {
-      setPostsInfo((prevState) => [...prevState, route.params]);
-    }
-  }, [route.params]);
+    getAllPosts();
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.cardInfo}>
@@ -41,7 +59,7 @@ const PostsScreen = ({ onLayout, navigation, route }) => {
       />
       <View style={{ alignItems: "center" }}>
         <Text style={{ ...styles.locationName, fontFamily: "Roboto" }}>
-          {item.name}
+          {item.description}
         </Text>
         <View style={{ ...styles.infoSection }}>
           <View style={{ flexDirection: "row", marginRight: 27 }}>
@@ -76,14 +94,10 @@ const PostsScreen = ({ onLayout, navigation, route }) => {
   );
 
   return (
-    <View style={styles.container} onLayout={onLayout} >
+    <View style={styles.container} onLayout={onLayout}>
       <View style={styles.header}>
         <Text style={{ ...styles.title, fontFamily: "RobotoBold" }}>Posts</Text>
-        <TouchableOpacity
-          style={styles.logOutBtn}
-          onPress={signOut}
-    
-        >
+        <TouchableOpacity style={styles.logOutBtn} onPress={signOut}>
           <LogOutIcon width={24} height={24} />
         </TouchableOpacity>
       </View>
@@ -101,7 +115,7 @@ const PostsScreen = ({ onLayout, navigation, route }) => {
       <View>
         <FlatList
           data={postsInfo}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(postsInfo.id)}
           renderItem={renderItem}
         />
       </View>
@@ -112,7 +126,7 @@ const PostsScreen = ({ onLayout, navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom:200,
+    paddingBottom: 200,
   },
   header: {
     position: "relative",

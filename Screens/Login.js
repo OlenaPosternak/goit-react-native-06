@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 
+import { useTogglePasswordVisibility } from "../assets/useTogglePasswordVisibility";
 import { authSignInUser } from "../redux/auth/authOperations";
 import { useDispatch } from "react-redux";
 
@@ -29,8 +30,10 @@ const Login = ({ navigation, onLayout }) => {
   const [borderColorEmail, setborderColorEmail] = useState("#E8E8E8");
   const [borderColorPassword, setborderColorPassword] = useState("#E8E8E8");
 
+  const { passwordVisibility, rightIcon, handlePasswordVisibility } =
+    useTogglePasswordVisibility();
+
   const onLogin = () => {
-    // console.log(`LOGIN_state`, state);
     dispatch(authSignInUser(state));
     setState(initialState);
 
@@ -122,7 +125,7 @@ const Login = ({ navigation, onLayout }) => {
                     }}
                     onBlur={() => setborderColorPassword("transparent")}
                     placeholder="Password"
-                    secureTextEntry={true}
+                    secureTextEntry={passwordVisibility}
                     style={{
                       ...styles.input,
                       fontFamily: "Roboto",
@@ -130,9 +133,10 @@ const Login = ({ navigation, onLayout }) => {
                       marginBottom: 0,
                     }}
                   />
-                  <TouchableOpacity>
+
+                  <TouchableOpacity onPress={handlePasswordVisibility}>
                     <Text style={{ ...styles.password, fontFamily: "Roboto" }}>
-                      Show password
+                      {rightIcon}
                     </Text>
                   </TouchableOpacity>
                 </View>

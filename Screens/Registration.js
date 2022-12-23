@@ -38,12 +38,8 @@ const Registration = ({ navigation, onLayout }) => {
     useTogglePasswordVisibility();
 
   const onRegister = () => {
-    // console.log(`state`,state);
-    dispatch(authSignUpUser(state))
+    dispatch(authSignUpUser(state));
     setState(initialState);
-
-    // navigation.navigate("Home");
-
     setIsShowKeyboard(false);
     Keyboard.dismiss();
   };
@@ -54,21 +50,36 @@ const Registration = ({ navigation, onLayout }) => {
   };
 
   //   відступ від краю екрану
-  const window = Dimensions.get("window").width - 16 * 2;
-  const [dimensions, setDimensions] = useState(window);
+  //  параметри екрану
+  const [windowWidth, setWindowWidth] = useState(
+    Dimensions.get("window").width
+  );
+
+  const [windowHeight, setWindowHeight] = useState(
+    Dimensions.get("window").height
+  );
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener("change", (window) => {
-      setDimensions(window);
-    });
-    return () => subscription?.remove();
-  }, [dimensions]);
+    const onChange = () => {
+      const width = Dimensions.get("window").width;
+      setWindowWidth(width);
+      const height = Dimensions.get("window").height;
+      setWindowHeight(height);
+    };
+    const dimensionsHandler = Dimensions.addEventListener("change", onChange);
+
+    return () => dimensionsHandler?.remove();
+  }, []);
 
   return (
     <ScrollView style={styles.container} onLayout={onLayout}>
       <TouchableWithoutFeedback onPress={keyboardHide}>
         <ImageBackground
-          style={styles.imageBGPicture}
+          style={{
+            ...styles.imageBGPicture,
+            width: windowWidth,
+            height: windowHeight,
+          }}
           source={require("../assets/img/Photo_BG.jpg")}
         >
           <View
@@ -83,7 +94,7 @@ const Registration = ({ navigation, onLayout }) => {
             <Text style={{ ...styles.title, fontFamily: "RobotoBold" }}>
               Registration
             </Text>
-            <View style={{ ...styles.form, width: dimensions }}>
+            <View style={{ ...styles.form, width: windowWidth }}>
               <TextInput
                 value={state.login}
                 onChangeText={(value) =>
@@ -202,7 +213,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 14,
     left: 104,
-    // right:12,
   },
   title: {
     fontSize: 30,
@@ -211,7 +221,7 @@ const styles = StyleSheet.create({
     marginBottom: 33,
   },
   form: {
-    flex: 1,
+    paddingHorizontal: 16,
   },
   input: {
     marginBottom: 16,

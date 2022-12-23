@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Camera } from "expo-camera";
 
 import * as Location from "expo-location";
 
 import {
+  Device,
   Alert,
   Button,
   Image,
@@ -17,14 +19,18 @@ import {
   TextInput,
 } from "react-native";
 
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebase";
+
 import ArrowLeft from "../../assets/img/arrow-left.svg";
 import MapIcon from "../../assets/img/map-pin.svg";
 import Photo from "../../assets/img/Photo.svg";
 import Trash from "../../assets/img/trash.svg";
 
 export const CreateScreen = ({ onLayout, navigation }) => {
-  const [name, setName] = useState("");
-  const [location, setLocation] = useState(null);
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
 
   //   camera
 
@@ -32,40 +38,15 @@ export const CreateScreen = ({ onLayout, navigation }) => {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
 
-  //   зайва змінна?
+  const { userId, login } = useSelector((state) => state.auth);
 
-  const nameHandler = (text) => setName(text.trim());
-  //   const locationHandler = (text) => setLocation(text.trim());
-
-  const onPost = () => {
-    if (!name.trim() && !location) {
-      Alert.alert(`Please fill in all info!`);
-      return;
-    }
-    sendInfo();
-    setName("");
-    setLocation(null);
-    setPhoto(null);
-    Keyboard.dismiss();
-  };
+  const descriptionHandler = (text) => setDescription(text.trim());
 
   const keyboardHide = () => {
     Keyboard.dismiss();
   };
 
-  const onDelete = () => {
-    setName("");
-    setLocation(null);
-    setPhoto(null);
-
-    Keyboard.dismiss();
-  };
-
-  //   Camera
-  const takePhoto = async () => {
-    const photo = await camera.takePictureAsync();
-    setPhoto(photo.uri);
-  };
+  //   Location
 
   useEffect(() => {
     (async () => {
@@ -80,21 +61,18 @@ export const CreateScreen = ({ onLayout, navigation }) => {
         setErrorMsg("Permission to access location was denied");
         return;
       }
+      let locationOfPhoto = await Location.getCurrentPositionAsync({});
+      console.log(`locationOfPhoto`, locationOfPhoto);
 
-      //   let location = await Location.getCurrentPositionAsync({});
-      let locationOfPhoto = await Location.getCurrentPositionAsync();
-
-      let coords = {
-        latitude: locationOfPhoto.coords.latitude,
-        longitude: locationOfPhoto.coords.longitude,
-      };
-      setLocation(coords);
-    //   console.log(`location`, location);
+      setLocation(locationOfPhoto);
     })();
   }, []);
 
-  const sendInfo = () => {
-    navigation.navigate("Posts", { photo, name, location });
+  //   Camera
+  const takePhoto = async () => {
+    const photo = await camera.takePictureAsync();
+    console.log(`location_takePhoto`, location);
+    setPhoto(photo.uri);
   };
 
   if (!permission) {
@@ -113,6 +91,82 @@ export const CreateScreen = ({ onLayout, navigation }) => {
     );
   }
 
+  //   завантаження фото на firebase
+  const uploadPhotoToServer = async () => {
+    const storage = getStorage();
+    const uniquePostId = Date.now().toString();
+    const storageRef = ref(storage, `imagas/${uniquePostId}`);
+
+    const response = await fetch(photo);
+    const file = await response.blob();
+
+    const uploadPhoto = await uploadBytes(storageRef, file).then(() => {
+      console.log(`photo is uploaded`);
+    });
+
+    const processedPhoto = await getDownloadURL(
+      ref(storage, `imagas/${uniquePostId}`)
+    )
+      .then((url) => {
+        return url;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return processedPhoto;
+  };
+
+  //   завантаження всього допису на firebase
+  const uploadPostToServer = async () => {
+    const photo = await uploadPhotoToServer();
+
+    try {
+      const setUserPost = await addDoc(collection(db, "posts"), {
+        photo,
+        description,
+        location: location.coords,
+        userId,
+        login,
+      });
+      console.log("Document written with ID: ", setUserPost.id);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+
+    console.log(`setUserPost`, setUserPost);
+    // return createPost;
+  };
+
+  const sendInfo = () => {
+    // navigation.navigate("Posts", { photo, description, location });
+    navigation.navigate("Posts")
+  };
+
+  const onPost = () => {
+    if (!description.trim() && !location) {
+      Alert.alert(`Please fill in all info!`);
+      return;
+    }
+    console.log(`location`, location);
+    console.log(`description`, description);
+    uploadPostToServer();
+
+    sendInfo();
+    uploadPhotoToServer();
+    setDescription("");
+    setLocation(null);
+    setPhoto(null);
+    Keyboard.dismiss();
+  };
+
+  const onDelete = () => {
+    setDescription("");
+    setLocation(null);
+    setPhoto(null);
+
+    Keyboard.dismiss();
+  };
+
   return (
     <ScrollView style={styles.container} onLayout={onLayout}>
       <TouchableWithoutFeedback onPress={keyboardHide}>
@@ -121,7 +175,10 @@ export const CreateScreen = ({ onLayout, navigation }) => {
             <Text style={{ ...styles.title, fontFamily: "RobotoBold" }}>
               Create post
             </Text>
-            <TouchableOpacity style={styles.backBtn} onPress={()=>( navigation.navigate("Posts"))}>
+            <TouchableOpacity
+              style={styles.backBtn}
+              onPress={() => navigation.navigate("Posts")}
+            >
               <ArrowLeft width={24} height={24} />
             </TouchableOpacity>
           </View>
@@ -161,9 +218,9 @@ export const CreateScreen = ({ onLayout, navigation }) => {
 
               <View style={styles.form}>
                 <TextInput
-                  value={name}
-                  onChangeText={nameHandler}
-                  placeholder="Name"
+                  value={description}
+                  onChangeText={descriptionHandler}
+                  placeholder="Description"
                   style={{
                     ...styles.input,
                     fontFamily: "Roboto",
@@ -187,7 +244,8 @@ export const CreateScreen = ({ onLayout, navigation }) => {
                         fontSize: 16,
                       }}
                     >
-                      Location: {location?.latitude}, {location?.longitude}
+                      Location: {location && JSON.stringify(location.coords)}
+                      {/* {location?.latitude}, {location?.longitude} */}
                     </Text>
                   </TouchableOpacity>
                 </View>
