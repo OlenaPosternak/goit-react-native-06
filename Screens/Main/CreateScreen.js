@@ -31,6 +31,7 @@ import Trash from "../../assets/img/trash.svg";
 export const CreateScreen = ({ onLayout, navigation }) => {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
 
   //   camera
 
@@ -64,27 +65,22 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       let locationOfPhoto = await Location.getCurrentPositionAsync({});
       console.log(`locationOfPhoto`, locationOfPhoto);
 
-      let coords ={
-        latitude:locationOfPhoto.coords.latitude,
-        longitude: locationOfPhoto.coords.longitude
-        
-      }
-    //   ??
+      let coords = {
+        latitude: locationOfPhoto.coords.latitude,
+        longitude: locationOfPhoto.coords.longitude,
+      };
 
       let address = await Location.reverseGeocodeAsync(coords);
-      console.log(`address`,address);
-      let city = address[0].city
-      console.log(`addresscity`,address[0].city);
-
-
-      setLocation(city);
+      console.log(`address`, address);
+      let city = address[0].city;
+      setLocation(locationOfPhoto);
+      setCity(city);
     })();
   }, []);
 
   //   Camera
   const takePhoto = async () => {
     const photo = await camera.takePictureAsync();
-    console.log(`location_takePhoto`, location);
     setPhoto(photo.uri);
   };
 
@@ -137,7 +133,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       const setUserPost = await addDoc(collection(db, "posts"), {
         photo,
         description,
-        location,
+        city,
         userId,
         login,
       });
@@ -150,7 +146,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
   };
 
   const sendInfo = () => {
-    navigation.navigate("Posts")
+    navigation.navigate("Posts");
   };
 
   const onPost = () => {
@@ -164,6 +160,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
     uploadPhotoToServer();
     setDescription("");
     setLocation(null);
+    setCity(null);
     setPhoto(null);
     Keyboard.dismiss();
   };
@@ -171,6 +168,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
   const onDelete = () => {
     setDescription("");
     setLocation(null);
+    setCity(null);
     setPhoto(null);
 
     Keyboard.dismiss();
@@ -243,7 +241,9 @@ export const CreateScreen = ({ onLayout, navigation }) => {
 
                       justifyContent: "center",
                     }}
-                    onPress={() => navigation.navigate("MapScreen")}
+                    onPress={() =>
+                      navigation.navigate("MapScreen", location&&{location: location })
+                    }
                   >
                     <MapIcon style={styles.location} />
                     <Text
@@ -253,7 +253,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
                         fontSize: 16,
                       }}
                     >
-                      Location: {location && location}
+                      Location: {city}
                       {/* {location?.latitude}, {location?.longitude} */}
                     </Text>
                   </TouchableOpacity>
