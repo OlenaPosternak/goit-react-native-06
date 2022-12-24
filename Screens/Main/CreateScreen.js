@@ -63,6 +63,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       }
       let locationOfPhoto = await Location.getCurrentPositionAsync({});
       console.log(`locationOfPhoto`, locationOfPhoto);
+
       let coords ={
         latitude:locationOfPhoto.coords.latitude,
         longitude: locationOfPhoto.coords.longitude
@@ -72,9 +73,11 @@ export const CreateScreen = ({ onLayout, navigation }) => {
 
       let address = await Location.reverseGeocodeAsync(coords);
       console.log(`address`,address);
+      let city = address[0].city
+      console.log(`addresscity`,address[0].city);
 
 
-      setLocation(locationOfPhoto);
+      setLocation(city);
     })();
   }, []);
 
@@ -134,7 +137,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       const setUserPost = await addDoc(collection(db, "posts"), {
         photo,
         description,
-        location: location.coords,
+        location,
         userId,
         login,
       });
@@ -143,12 +146,10 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       console.error("Error adding document: ", e);
     }
 
-    console.log(`setUserPost`, setUserPost);
     // return createPost;
   };
 
   const sendInfo = () => {
-    // navigation.navigate("Posts", { photo, description, location });
     navigation.navigate("Posts")
   };
 
@@ -157,8 +158,6 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       Alert.alert(`Please fill in all info!`);
       return;
     }
-    console.log(`location`, location);
-    console.log(`description`, description);
     uploadPostToServer();
 
     sendInfo();
@@ -254,7 +253,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
                         fontSize: 16,
                       }}
                     >
-                      Location: {location && JSON.stringify(location.coords)}
+                      Location: {location && location}
                       {/* {location?.latitude}, {location?.longitude} */}
                     </Text>
                   </TouchableOpacity>

@@ -9,7 +9,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import { collection, query, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  getDocs,
+  onSnapshot,
+  doc,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 
 import { authSignOutUser } from "../../redux/auth/authOperations";
@@ -27,17 +33,21 @@ const PostsScreen = ({ onLayout, navigation }) => {
   };
 
   const getAllPosts = async () => {
-    const q = query(collection(db, "posts"));
-
-    const querySnapshot = await getDocs(q);
-    setPostsInfo(
-      querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+    // const q = query(collection(db, "posts"));
+    const dbRef = collection(db, "posts");
+    onSnapshot(dbRef, (docSnap) =>
+      setPostsInfo(docSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
     );
+
+    // const querySnapshot = await getDocs(q);
+    // setPostsInfo(
+    //   querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+    // );
   };
 
   useEffect(() => {
     getAllPosts();
-  }, [postsInfo]);
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.cardInfo}>
@@ -72,8 +82,7 @@ const PostsScreen = ({ onLayout, navigation }) => {
                 flexDirection: "column",
               }}
             >
-              <Text>{item.location?.latitude}</Text>
-              <Text>{item.location?.longitude}</Text>
+              <Text>{item.location}</Text>
             </View>
           </View>
         </View>
@@ -103,7 +112,7 @@ const PostsScreen = ({ onLayout, navigation }) => {
       <View>
         <FlatList
           data={postsInfo}
-          keyExtractor={(postsInfo.id)}
+          keyExtractor={postsInfo.id}
           renderItem={renderItem}
         />
       </View>
