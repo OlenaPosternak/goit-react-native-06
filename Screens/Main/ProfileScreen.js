@@ -5,38 +5,52 @@ import {
   Dimensions,
   Image,
   ImageBackground,
-  Keyboard,
-  ScrollView,
+  FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { collection, onSnapshot, where, query } from "firebase/firestore";
+import { db } from "../../firebase";
 
 import { authSignOutUser } from "../../redux/auth/authOperations";
 
+// import ions
 import Delete from "../../assets/img/delete.svg";
 import LogOutIcon from "../../assets/img/log-out.svg";
-
 import Shape from "../../assets/img/Shape.svg";
 import ThumbsUp from "../../assets/img/thumbs-up.svg";
 import Location from "../../assets/img/map-pin.svg";
 
-const ProfileScreen = ({ onLayout }) => {
-  const { login } = useSelector((state) => state.auth);
+const ProfileScreen = ({ onLayout, navigation }) => {
+  const { login, userId } = useSelector((state) => state.auth);
+  const [userPosts, setUserposts] = useState("");
+  const { myImage } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
-  const signOut = () => {
-    dispatch(authSignOutUser());
+  //   get all posts from current user
+  const getUserPosts = async () => {
+    try {
+      const dbRef = query(
+        collection(db, "posts"),
+        where("userId", "==", userId)
+      );
+      onSnapshot(dbRef, (docSnap) =>
+        setUserposts(docSnap.docs.map((doc) => ({ ...doc.data() })))
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  useEffect(() => {
+    getUserPosts();
+  }, []);
 
-  const keyboardHide = () => {
-    setIsShowKeyboard(false);
-    Keyboard.dismiss();
+  const signOut = () => {
+    dispatch(authSignOutUser());
   };
 
   //  параметри екрану
@@ -61,86 +75,111 @@ const ProfileScreen = ({ onLayout }) => {
   }, []);
   //
 
-  return (
-    <ScrollView style={styles.container} onLayout={onLayout}>
-      <TouchableWithoutFeedback onPress={keyboardHide}>
+  const renderItem = ({ item }) => (
+    <View style={styles.cardInfo}>
+      <Image
+        source={{ uri: item.photo }}
+        style={{ height: 240, width: 350, borderRadius: 8 }}
+      />
+      <View style={{ width: "100%" }}>
+        <Text style={{ ...styles.locationName, fontFamily: "Roboto" }}>
+          {item.description}
+        </Text>
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{ ...styles.infoSection, justifyContent: "space-between" }}
         >
-          <ImageBackground
-            style={{
-              ...styles.imageBGPicture,
-              width: windowWidth,
-              height: windowHeight,
-            }}
-            source={require("../../assets/img/Photo_BG.jpg")}
-          >
-            <View style={styles.wrapper}>
-              <View style={styles.image_thumb}>
-                <Delete style={styles.delBtn} width={25} height={25} />
-              </View>
-              <TouchableOpacity onPress={signOut} style={styles.logOutBtn}>
-                <LogOutIcon width={24} height={24} />
+          <View style={{ flexDirection: "row" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("Comments", {
+                    postId: item.id,
+                    photo: item.photo,
+                  });
+                }}
+              >
+                <Shape width={24} height={24} />
               </TouchableOpacity>
-              <Text style={{ ...styles.title, fontFamily: "RobotoBold" }}>
-                {login}
-              </Text>
 
-              <View style={styles.cardInfo}>
-                <Image
-                  source={require("../../assets/img/Photo_BG.jpg")}
-                  style={{ height: 240, borderRadius: 8 }}
-                />
-                <View>
-                  <Text
-                    style={{ ...styles.locationName, fontFamily: "Roboto" }}
-                  >
-                    {" "}
-                    Name{" "}
-                  </Text>
-                  <View
-                    style={{ ...styles.infoSection, width: windowWidth - 32 }}
-                  >
-                    <View style={{ flexDirection: "row", marginRight: 27 }}>
-                      <View
-                        style={{ flexDirection: "row", alignItems: "center" }}
-                      >
-                        <TouchableOpacity>
-                          <Shape width={24} height={24} />
-                        </TouchableOpacity>
-
-                        <Text style={{ alignSelf: "center", marginRight: 8 }}>
-                          {" "}
-                          34{" "}
-                        </Text>
-                      </View>
-
-                      <View style={{ flexDirection: "row" }}>
-                        <TouchableOpacity>
-                          <ThumbsUp width={24} height={24} />
-                        </TouchableOpacity>
-                        <Text style={{ alignSelf: "center", marginLeft: 8 }}>
-                          {" "}
-                          159{" "}
-                        </Text>
-                      </View>
-                    </View>
-                    <View
-                      style={{ flexDirection: "row", justifyContent: "center" }}
-                    >
-                      <Location width={24} height={24} />
-                      <Text style={{ alignSelf: "center", marginLeft: 8 }}>
-                        Location
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
+              <Text style={{ alignSelf: "center", marginRight: 8 }}> Comments </Text>
             </View>
-          </ImageBackground>
+
+            {/* <View style={{ flexDirection: "row" }}>
+              <TouchableOpacity>
+                <ThumbsUp width={24} height={24} />
+              </TouchableOpacity>
+              <Text style={{ alignSelf: "center", marginLeft: 8 }}> Like </Text>
+            </View> */}
+          </View>
+          <TouchableOpacity
+            style={{ flexDirection: "row", justifyContent: "center" }}
+            onPress={() =>
+              navigation.navigate("MapScreen", { location: item.location })
+            }
+          >
+            <Location width={24} height={24} />
+            <Text style={{ alignSelf: "center", marginLeft: 8 }}>
+              {item.city}
+            </Text>
+          </TouchableOpacity>
         </View>
-      </TouchableWithoutFeedback>
-    </ScrollView>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container} onLayout={onLayout}>
+      <View style={{ flex: 1 }}>
+        <ImageBackground
+          style={{
+            ...styles.imageBGPicture,
+            width: windowWidth,
+            height: windowHeight,
+          }}
+          source={require("../../assets/img/Photo_BG.jpg")}
+        >
+          <View style={styles.wrapper}>
+            <View style={styles.image_thumb}>
+              {myImage ? (
+                <Image
+                  source={{ uri: myImage }}
+                  style={{
+                    height: 120,
+                    with: 120,
+                    borderRadius: 16,
+                  }}
+                />
+              ) : (
+                <View>
+                  <Text>No Image</Text>
+                  {/* <Delete style={styles.addBtn} width={25} height={25} /> */}
+                </View>
+              )}
+            </View>
+
+            <TouchableOpacity onPress={signOut} style={styles.logOutBtn}>
+              <LogOutIcon width={24} height={24} />
+            </TouchableOpacity>
+            <Text style={{ ...styles.title, fontFamily: "RobotoBold" }}>
+              {login}
+            </Text>
+            <View>
+              <FlatList
+                data={userPosts}
+                keyExtractor={userPosts.id}
+                renderItem={renderItem}
+              />
+            </View>
+          </View>
+        </ImageBackground>
+      </View>
+    </View>
   );
 };
 
@@ -156,8 +195,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     marginTop: 147,
-
     paddingTop: 33,
+    paddingBottom: 80,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     backgroundColor: "#fff",
@@ -186,7 +225,6 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 32,
     fontSize: 30,
-    textAlign: "center",
     lineHeight: 35.16,
     marginBottom: 33,
   },
@@ -194,6 +232,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 35,
+    marginHorizontal: 16,
   },
   locationName: {
     fontSize: 16,
@@ -202,8 +241,6 @@ const styles = StyleSheet.create({
   infoSection: {
     marginTop: 8,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
 });
 

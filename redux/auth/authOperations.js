@@ -1,5 +1,4 @@
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
@@ -7,7 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { Alert } from "react-native";
-import { app, auth } from "../../firebase";
+import { auth } from "../../firebase";
 import { authSlice } from "./authReducer";
 const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
 
@@ -15,30 +14,32 @@ const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
 // const auth = getAuth(app);
 
 export const authSignUpUser =
-  ({ email, password, login }) =>
+  ({ email, password, login, myImage }) =>
   async (dispatch, getSatte) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password,
-        login
+        login,
       );
 
       updateProfile(auth.currentUser, {
         displayName: login,
+        photoURL: myImage,
       }).then(() => {
         dispatch(
           updateUserProfile({
             userId: userCredential.user.uid,
             login: userCredential.user.displayName,
             email: userCredential.user.email,
+            myImage: userCredential.user.photoURL,
           })
         );
       });
     } catch (error) {
       Alert.alert(error.message);
-      console.log("error.message", error.message);
+      console.log("error.messageOperations", error.message);
     }
   };
 
@@ -49,9 +50,9 @@ export const authSignInUser =
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
-        // console.log(`userCredential.user`, userCredential.user);
+        console.log(`userCredential.user`, userCredential.user);
     } catch (error) {
       Alert.alert(`${error.message}`);
       console.log("error.message", error.message);
@@ -66,6 +67,8 @@ export const authStateCahngeUser = () => async (dispatch, getState) => {
         login: user.displayName,
         userId: user.uid,
         email:user.email,
+        myImage: user.photoURL,
+        
       };
 
       dispatch(authStateChange({ stateChange: true }));

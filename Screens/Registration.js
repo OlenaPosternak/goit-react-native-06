@@ -1,10 +1,13 @@
 import { useTogglePasswordVisibility } from "../assets/useTogglePasswordVisibility";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import Add from "../assets/img/add.svg";
 import React, { useState, useEffect, useCallback } from "react";
 import {
+  Alert,
   Dimensions,
   ImageBackground,
+  Image,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -15,6 +18,7 @@ import {
   View,
 } from "react-native";
 
+import * as ImagePicker from "expo-image-picker";
 import { authSignUpUser } from "../redux/auth/authOperations";
 import { useDispatch } from "react-redux";
 
@@ -22,6 +26,7 @@ const initialState = {
   email: "",
   password: "",
   login: "",
+  myImage: "",
 };
 
 const Registration = ({ navigation, onLayout }) => {
@@ -37,11 +42,64 @@ const Registration = ({ navigation, onLayout }) => {
   const { passwordVisibility, rightIcon, handlePasswordVisibility } =
     useTogglePasswordVisibility();
 
-  const onRegister = () => {
-    dispatch(authSignUpUser(state));
-    setState(initialState);
-    setIsShowKeyboard(false);
-    Keyboard.dismiss();
+  const [myImageUploud, setmyImageUploud] = useState("");
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result.assets[0].uri);
+
+    if (!result.canceled) {
+      setmyImageUploud(result.assets[0].uri);
+    }
+  };
+
+  //   завантаження фото на firebase
+  const uploadPhotoToServer = async () => {
+    const storage = getStorage();
+    const uniquePostId = Date.now().toString();
+    const storageRef = ref(storage, `avatarImage/${uniquePostId}`);
+
+    const response = await fetch(myImageUploud);
+    const file = await response.blob();
+
+    const uploadPhoto = await uploadBytes(storageRef, file).then(() => {
+      console.log(`My Image is uploaded`);
+    });
+
+    const processedPhoto = await getDownloadURL(
+      ref(storage, `avatarImage/${uniquePostId}`)
+    )
+      .then((url) => {
+        console.log(`url`, url);
+        return url;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return processedPhoto;
+  };
+
+  const onRegister = async () => {
+    try {
+      const imageRef = await uploadPhotoToServer();
+      console.log(`imageRef`, imageRef);
+
+      setState((prevState) => ({ ...prevState, myImage: imageRef }));
+      console.log(`state`, state);
+      dispatch(authSignUpUser(state));
+      // setState(initialState);
+      setIsShowKeyboard(false);
+      Keyboard.dismiss();
+    } catch (error) {
+      console.log("error.messageRegister", error.message);
+    }
   };
 
   const keyboardHide = () => {
@@ -89,8 +147,22 @@ const Registration = ({ navigation, onLayout }) => {
             }}
           >
             <View style={styles.image_thumb}>
-              <Add style={styles.addBtn} width={25} height={25} />
+              {myImageUploud ? (
+                <Image
+                  source={{ uri: myImageUploud }}
+                  style={{
+                    height: 120,
+                    with: 120,
+                    borderRadius: 16,
+                  }}
+                />
+              ) : (
+                <TouchableOpacity onPress={pickImage}>
+                  <Add style={styles.addBtn} width={25} height={25} />
+                </TouchableOpacity>
+              )}
             </View>
+
             <Text style={{ ...styles.title, fontFamily: "RobotoBold" }}>
               Registration
             </Text>
@@ -190,7 +262,6 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     flex: 1,
-    alignItems: "center",
 
     paddingTop: 92,
     borderWidth: 1,
@@ -202,6 +273,7 @@ const styles = StyleSheet.create({
   image_thumb: {
     position: "absolute",
     top: -60,
+    left: "35%",
     width: 120,
     height: 120,
     backgroundColor: "#F6F6F6",
@@ -211,7 +283,7 @@ const styles = StyleSheet.create({
   },
   addBtn: {
     position: "absolute",
-    bottom: 14,
+    top: 0,
     left: 104,
   },
   title: {

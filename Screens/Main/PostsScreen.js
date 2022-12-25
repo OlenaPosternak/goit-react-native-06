@@ -19,11 +19,14 @@ import LogOutIcon from "../../assets/img/log-out.svg";
 import Shape from "../../assets/img/Shape.svg";
 import Location from "../../assets/img/map-pin.svg";
 
-const PostsScreen = ({ onLayout, navigation }) => {
+const PostsScreen = ({ onLayout, navigation}) => {
   const [postsInfo, setPostsInfo] = useState([]);
+
+
   const dispatch = useDispatch();
 
-  const { email, login, photo } = useSelector((state) => state.auth);
+  const { email, login, myImage } = useSelector((state) =>state.auth);
+  console.log(`myImage`,myImage)
   const signOut = () => {
     dispatch(authSignOutUser());
   };
@@ -61,7 +64,7 @@ const PostsScreen = ({ onLayout, navigation }) => {
                 <Shape width={24} height={24} />
               </TouchableOpacity>
 
-              <Text style={{ alignSelf: "center", marginRight: 8 }}> 34 </Text>
+              <Text style={{ alignSelf: "center", marginRight: 8 }}> Comments </Text>
             </View>
           </View>
           <TouchableOpacity
@@ -97,8 +100,8 @@ const PostsScreen = ({ onLayout, navigation }) => {
 
       <View style={styles.userInfo}>
         <Image
-          style={{ marginRight: 8, borderRadius: 16 }}
-          source={require("../../assets/img/UserPhoto.jpg")}
+          style={{ marginRight: 8, borderRadius: 16, width:60, height:60 }}
+          source={{uri:myImage}}
         />
         <View>
           <Text style={{ fontFamily: "RobotoBold" }}>{login}</Text>

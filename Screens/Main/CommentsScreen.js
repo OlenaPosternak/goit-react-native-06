@@ -82,9 +82,9 @@ const CommentsScreen = ({ route }) => {
           style={styles.imageIcon}
         />
         <View style={styles.comment}>
-          <Text>Login: {login}</Text>
+          <Text style={{ fontSize: 16 }}>User: {login}</Text>
           <Text>{item.comment}</Text>
-          <Text>
+          <Text style={styles.date}>
             {item.date}|{item.time}
           </Text>
         </View>
@@ -145,6 +145,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: "rgba(0, 0, 0, 0.03)",
     backgroundColor: "rgba(0, 0, 0, 0.03)",
+  },
+  date: {
+    fontSize: 12,
+    textAlign: "right",
+    color: "grey",
   },
   submitBtn: {
     justifyContent: "center",
