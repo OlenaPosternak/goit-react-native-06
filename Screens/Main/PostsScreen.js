@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import {
   Image,
@@ -9,13 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import {
-  collection,
-  query,
-  getDocs,
-  onSnapshot,
-  doc,
-} from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 
 import { authSignOutUser } from "../../redux/auth/authOperations";
@@ -28,6 +23,7 @@ const PostsScreen = ({ onLayout, navigation }) => {
   const [postsInfo, setPostsInfo] = useState([]);
   const dispatch = useDispatch();
 
+  const { email, login, photo } = useSelector((state) => state.auth);
   const signOut = () => {
     dispatch(authSignOutUser());
   };
@@ -38,11 +34,6 @@ const PostsScreen = ({ onLayout, navigation }) => {
     onSnapshot(dbRef, (docSnap) =>
       setPostsInfo(docSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
     );
-
-    // const querySnapshot = await getDocs(q);
-    // setPostsInfo(
-    //   querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-    // );
   };
 
   useEffect(() => {
@@ -64,7 +55,7 @@ const PostsScreen = ({ onLayout, navigation }) => {
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate("CommentsScreen");
+                  navigation.navigate("Comments", {postId:item.id, photo:item.photo});
                 }}
               >
                 <Shape width={24} height={24} />
@@ -73,7 +64,12 @@ const PostsScreen = ({ onLayout, navigation }) => {
               <Text style={{ alignSelf: "center", marginRight: 8 }}> 34 </Text>
             </View>
           </View>
-          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          <TouchableOpacity
+            style={{ flexDirection: "row", justifyContent: "center" }}
+            onPress={() =>
+              navigation.navigate("MapScreen", { location: item.location })
+            }
+          >
             <Location width={24} height={24} />
             <View
               style={{
@@ -82,9 +78,9 @@ const PostsScreen = ({ onLayout, navigation }) => {
                 flexDirection: "column",
               }}
             >
-              <Text>{item.location}</Text>
+              <Text>{item.city}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -105,8 +101,8 @@ const PostsScreen = ({ onLayout, navigation }) => {
           source={require("../../assets/img/UserPhoto.jpg")}
         />
         <View>
-          <Text style={{ fontFamily: "RobotoBold" }}>userLogin</Text>
-          <Text style={{ fontFamily: "Roboto" }}>userEmail</Text>
+          <Text style={{ fontFamily: "RobotoBold" }}>{login}</Text>
+          <Text style={{ fontFamily: "Roboto" }}>{email}</Text>
         </View>
       </View>
       <View>

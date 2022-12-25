@@ -63,7 +63,6 @@ export const CreateScreen = ({ onLayout, navigation }) => {
         return;
       }
       let locationOfPhoto = await Location.getCurrentPositionAsync({});
-      console.log(`locationOfPhoto`, locationOfPhoto);
 
       let coords = {
         latitude: locationOfPhoto.coords.latitude,
@@ -133,6 +132,7 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       const setUserPost = await addDoc(collection(db, "posts"), {
         photo,
         description,
+        location,
         city,
         userId,
         login,
@@ -142,7 +142,6 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       console.error("Error adding document: ", e);
     }
 
-    // return createPost;
   };
 
   const sendInfo = () => {
@@ -150,8 +149,10 @@ export const CreateScreen = ({ onLayout, navigation }) => {
   };
 
   const onPost = () => {
-    if (!description.trim() && !location) {
-      Alert.alert(`Please fill in all info!`);
+    if (!description.trim() || !location) {
+      Alert.alert(
+        `Please fill in the description and wait until the Location is uploaded!`
+      );
       return;
     }
     uploadPostToServer();
@@ -204,7 +205,9 @@ export const CreateScreen = ({ onLayout, navigation }) => {
                   />
                   <TouchableOpacity
                     style={styles.changeBtn}
-                    onPress={() => setPhoto(null)}
+                    onPress={() => {
+                      setPhoto(null), setLocation(null);
+                    }}
                   >
                     <Text style={{ color: "#fff" }}>New Photo</Text>
                   </TouchableOpacity>
@@ -234,16 +237,13 @@ export const CreateScreen = ({ onLayout, navigation }) => {
                   }}
                 />
                 <View>
-                  <TouchableOpacity
+                  <View
                     style={{
                       ...styles.input,
                       paddingLeft: 28,
 
                       justifyContent: "center",
                     }}
-                    onPress={() =>
-                      navigation.navigate("MapScreen", location&&{location: location })
-                    }
                   >
                     <MapIcon style={styles.location} />
                     <Text
@@ -254,9 +254,8 @@ export const CreateScreen = ({ onLayout, navigation }) => {
                       }}
                     >
                       Location: {city}
-                      {/* {location?.latitude}, {location?.longitude} */}
                     </Text>
-                  </TouchableOpacity>
+                  </View>
                 </View>
                 <TouchableOpacity
                   disabled={photo ? false : true}

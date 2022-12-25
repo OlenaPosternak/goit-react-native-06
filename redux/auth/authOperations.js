@@ -6,12 +6,13 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-import { app } from "../../firebase";
+import { Alert } from "react-native";
+import { app, auth } from "../../firebase";
 import { authSlice } from "./authReducer";
 const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
 
 // Initialize Firebase Authentication and get a reference to the service
-const auth = getAuth(app);
+// const auth = getAuth(app);
 
 export const authSignUpUser =
   ({ email, password, login }) =>
@@ -31,11 +32,12 @@ export const authSignUpUser =
           updateUserProfile({
             userId: userCredential.user.uid,
             login: userCredential.user.displayName,
+            email: userCredential.user.email,
           })
         );
       });
     } catch (error) {
-      console.log("error", error);
+      Alert.alert(error.message);
       console.log("error.message", error.message);
     }
   };
@@ -49,9 +51,9 @@ export const authSignInUser =
         email,
         password
       );
-    //   console.log(`userCredential.user`, userCredential.user);
+        // console.log(`userCredential.user`, userCredential.user);
     } catch (error) {
-      console.log("error", error);
+      Alert.alert(`${error.message}`);
       console.log("error.message", error.message);
       showLoginError(error);
     }
@@ -63,6 +65,7 @@ export const authStateCahngeUser = () => async (dispatch, getState) => {
       const userUpdateProfile = {
         login: user.displayName,
         userId: user.uid,
+        email:user.email,
       };
 
       dispatch(authStateChange({ stateChange: true }));

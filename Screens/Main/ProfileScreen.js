@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import {
   Dimensions,
@@ -13,7 +14,7 @@ import {
   View,
 } from "react-native";
 
-import {authSignOutUser} from '../../redux/auth/authOperations'
+import { authSignOutUser } from "../../redux/auth/authOperations";
 
 import Delete from "../../assets/img/delete.svg";
 import LogOutIcon from "../../assets/img/log-out.svg";
@@ -23,6 +24,8 @@ import ThumbsUp from "../../assets/img/thumbs-up.svg";
 import Location from "../../assets/img/map-pin.svg";
 
 const ProfileScreen = ({ onLayout }) => {
+  const { login } = useSelector((state) => state.auth);
+
   const dispatch = useDispatch();
 
   const signOut = () => {
@@ -80,7 +83,7 @@ const ProfileScreen = ({ onLayout }) => {
                 <LogOutIcon width={24} height={24} />
               </TouchableOpacity>
               <Text style={{ ...styles.title, fontFamily: "RobotoBold" }}>
-                User Name
+                {login}
               </Text>
 
               <View style={styles.cardInfo}>

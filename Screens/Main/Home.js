@@ -58,8 +58,8 @@ const Home = () => {
         component={HomeTabsBtn}
       />
       <HomeStack.Screen
-        options={{ headerShown: false }}
-        name="CommentsScreen"
+        options={{ headerShown: true }}
+        name="Comments"
         component={CommentsScreen}
       />
       <HomeStack.Screen name="MapScreen" component={MapScreen} />
