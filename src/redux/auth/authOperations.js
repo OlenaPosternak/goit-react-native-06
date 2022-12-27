@@ -66,7 +66,7 @@ export const authSignInUser =
   ({ email, password }) =>
   async (dispatch, getSatte) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
+      const user = await signInWithEmailAndPassword(
         auth,
         email,
         password
@@ -79,7 +79,7 @@ export const authSignInUser =
     }
   };
 
-export const authStateCahngeUser = () => async (dispatch, getState) => {
+export const authStateCahngeUser = () => async (dispatch) => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       const userUpdateProfile = {

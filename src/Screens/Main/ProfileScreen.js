@@ -17,16 +17,16 @@ import { db } from "../../firebase";
 import { authSignOutUser } from "../../redux/auth/authOperations";
 
 // import ions
-import Delete from "../../assets/img/delete.svg";
 import LogOutIcon from "../../assets/img/log-out.svg";
 import Shape from "../../assets/img/Shape.svg";
-import ThumbsUp from "../../assets/img/thumbs-up.svg";
+// import ThumbsUp from "../../assets/img/thumbs-up.svg";
 import Location from "../../assets/img/map-pin.svg";
 
 const ProfileScreen = ({ onLayout, navigation }) => {
   const { login, userId } = useSelector((state) => state.auth);
   const [userPosts, setUserposts] = useState("");
   const { myImage } = useSelector((state) => state.auth);
+
 
   const dispatch = useDispatch();
 

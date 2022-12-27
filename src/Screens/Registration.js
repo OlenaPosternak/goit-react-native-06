@@ -31,61 +31,68 @@ const initialState = {
 const Registration = ({ navigation, onLayout }) => {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [state, setState] = useState(initialState);
-
+  
   const dispatch = useDispatch();
-
+  
   const [borderColorLogin, setborderColorLogin] = useState("#E8E8E8");
   const [borderColorEmail, setborderColorEmail] = useState("#E8E8E8");
   const [borderColorPassword, setborderColorPassword] = useState("#E8E8E8");
-
+  
   const { passwordVisibility, rightIcon, handlePasswordVisibility } =
-    useTogglePasswordVisibility();
-
+  useTogglePasswordVisibility();
+  
   const [myImageUploud, setmyImageUploud] = useState("");
-
+  
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      setmyImageUploud(result.assets[0].uri);
-    }
-  };
-
-  //   завантаження фото на firebase
-  const uploadPhotoToServer = async () => {
-    const storage = getStorage();
-    const uniquePostId = Date.now().toString();
-    const storageRef = ref(storage, `avatarImage/${uniquePostId}`);
-
-    const response = await fetch(myImageUploud);
-    const file = await response.blob();
-
-    const uploadPhoto = await uploadBytes(storageRef, file).then(() => {});
-
-    const processedPhoto = await getDownloadURL(
-      ref(storage, `avatarImage/${uniquePostId}`)
-    )
-      .then((url) => {
-        return url;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    return processedPhoto;
-  };
-
-  const onRegister = async () => {
-    try {
-      const imageRef = await uploadPhotoToServer();
-      console.log(`imageRef`, imageRef);
-
-      setState((prevState) => ({ ...prevState, myImage: imageRef }));
-      dispatch(authSignUpUser(state));
+      // No permissions request is necessary for launching the image library
+      let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 1,
+        });
+        if (!result.canceled) {
+            setmyImageUploud(result.assets[0].uri);
+        }
+    };
+    
+    //   завантаження фото на firebase
+    const uploadPhotoToServer = async () => {
+        const storage = getStorage();
+        const uniquePostId = Date.now().toString();
+        const storageRef = ref(storage, `avatarImage/${uniquePostId}`);
+        
+        const response = await fetch(myImageUploud);
+        const file = await response.blob();
+        
+        const uploadPhoto = await uploadBytes(storageRef, file).then(() => {});
+        
+        const processedPhoto = await getDownloadURL(
+            ref(storage, `avatarImage/${uniquePostId}`)
+            )
+            .then((url) => {
+                return url;
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+            return processedPhoto;
+        };
+        
+        const onRegister = async () => {
+            try {
+                const imageRef = await uploadPhotoToServer();
+                console.log(`imageRef`, imageRef);
+                
+                setState((prevState) => ({ ...prevState, myImage: imageRef }));
+                const newState={
+                    myImage: imageRef,
+                    login: state.login,
+                    email: state.email,
+                    password: state.password
+                }
+                console.log(`newState`, newState)
+                dispatch(authSignUpUser(newState));
       //   setState(initialState);
       setIsShowKeyboard(false);
       Keyboard.dismiss();
