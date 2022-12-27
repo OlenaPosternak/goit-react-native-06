@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "goit-react-native-01",
-    "slug": "goit-react-native-01",
+    "slug": "photo-app",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./src/assets/icon.png",
@@ -18,16 +18,24 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.olenaposternak.photoapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.olenaposternak.photoapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e7e690af-d691-4399-ad1e-ac7665eea92b"
+      }
+    },
+    "owner": "olenaposternak"
   }
 }
