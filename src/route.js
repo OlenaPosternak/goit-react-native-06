@@ -1,19 +1,13 @@
 import { createStackNavigator } from "@react-navigation/stack";
-// import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Login from "./Screens/Login";
 import Register from "./Screens/Registration";
 
 import Home from "./Screens/Main/Home";
-import CreateScreen from "./Screens/Main/CreateScreen";
-
 // import icons
 
 const AuthStack = createStackNavigator(); // вказує на групу навігаторів
-// const Tabs = createBottomTabNavigator();
-const HomeStack = createStackNavigator(); //група навігаторів з одним компонентом
-const CreateStack = createStackNavigator(); //група навігаторів з одним компонентом
 
-export default function  useRoute  (isAuth)  {
+export default function useRoute(isAuth) {
   if (!isAuth) {
     return (
       <AuthStack.Navigator initialRouteName="Login">
@@ -37,9 +31,7 @@ export default function  useRoute  (isAuth)  {
     );
   }
   return <Home />;
-};
-
-
+}
 
 // <Tabs.Navigator tabBarOptions={{ showLabel: false }}>
 //   <Tabs.Screen

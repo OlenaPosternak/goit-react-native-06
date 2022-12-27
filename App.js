@@ -2,18 +2,20 @@
 import React, { useEffect, useCallback } from "react";
 import { useFonts } from "expo-font";
 import { Provider } from "react-redux";
-import { SplashScreen } from "expo-splash-screen";
-import { store } from "./redux/store";
+// import * as SplashScreen from "expo-splash-screen";
 
-import Main from "./components/Main";
+import { SplashScreen } from "expo";
+import { store } from "./src/redux/store";
 
-import "./firebase";
+import Main from "./src/components/Main";
+
+import "./src/firebase";
 
 export default function App() {
   // підключення шрифту
   const [fontsLoaded] = useFonts({
-    RobotoBold: require("./assets/fonts/Roboto/Roboto-Bold.ttf"),
-    Roboto: require("./assets/fonts/Roboto/Roboto-Regular.ttf"),
+    RobotoBold: require("./src/assets/fonts/Roboto/Roboto-Bold.ttf"),
+    Roboto: require("./src/assets/fonts/Roboto/Roboto-Regular.ttf"),
   });
 
   useEffect(() => {

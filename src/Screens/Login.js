@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  Alert,
   Dimensions,
   ImageBackground,
   Keyboard,
@@ -34,6 +35,12 @@ const Login = ({ navigation, onLayout }) => {
     useTogglePasswordVisibility();
 
   const onLogin = () => {
+    if (!state.email.trim() || !state.password.trim()) {
+      Alert.alert(`All fields must be completed!`);
+      return;
+    }
+    Alert.alert(`Welcome`);
+
     dispatch(authSignInUser(state));
     setState(initialState);
 

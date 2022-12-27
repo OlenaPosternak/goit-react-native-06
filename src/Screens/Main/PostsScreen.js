@@ -19,20 +19,17 @@ import LogOutIcon from "../../assets/img/log-out.svg";
 import Shape from "../../assets/img/Shape.svg";
 import Location from "../../assets/img/map-pin.svg";
 
-const PostsScreen = ({ onLayout, navigation}) => {
+const PostsScreen = ({ onLayout, navigation }) => {
   const [postsInfo, setPostsInfo] = useState([]);
-
 
   const dispatch = useDispatch();
 
-  const { email, login, myImage } = useSelector((state) =>state.auth);
-  console.log(`myImage`,myImage)
+  const { email, login, myImage } = useSelector((state) => state.auth);
   const signOut = () => {
     dispatch(authSignOutUser());
   };
 
   const getAllPosts = async () => {
-    // const q = query(collection(db, "posts"));
     const dbRef = collection(db, "posts");
     onSnapshot(dbRef, (docSnap) =>
       setPostsInfo(docSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
@@ -58,13 +55,19 @@ const PostsScreen = ({ onLayout, navigation}) => {
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate("Comments", {postId:item.id, photo:item.photo});
+                  navigation.navigate("Comments", {
+                    postId: item.id,
+                    photo: item.photo,
+                  });
                 }}
               >
                 <Shape width={24} height={24} />
               </TouchableOpacity>
 
-              <Text style={{ alignSelf: "center", marginRight: 8 }}> Comments </Text>
+              <Text style={{ alignSelf: "center", marginRight: 8 }}>
+                {" "}
+                Comments{" "}
+              </Text>
             </View>
           </View>
           <TouchableOpacity
@@ -100,8 +103,8 @@ const PostsScreen = ({ onLayout, navigation}) => {
 
       <View style={styles.userInfo}>
         <Image
-          style={{ marginRight: 8, borderRadius: 16, width:60, height:60 }}
-          source={{uri:myImage}}
+          style={{ marginRight: 8, borderRadius: 16, width: 60, height: 60 }}
+          source={{ uri: myImage }}
         />
         <View>
           <Text style={{ fontFamily: "RobotoBold" }}>{login}</Text>

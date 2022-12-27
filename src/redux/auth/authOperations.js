@@ -15,28 +15,48 @@ const { updateUserProfile, authStateChange, authSignOut } = authSlice.actions;
 
 export const authSignUpUser =
   ({ email, password, login, myImage }) =>
-  async (dispatch, getSatte) => {
+  async (dispatch) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-        login,
-      );
+      await createUserWithEmailAndPassword(auth, email, password);
 
-      updateProfile(auth.currentUser, {
+      await updateProfile(auth.currentUser, {
         displayName: login,
         photoURL: myImage,
-      }).then(() => {
-        dispatch(
-          updateUserProfile({
-            userId: userCredential.user.uid,
-            login: userCredential.user.displayName,
-            email: userCredential.user.email,
-            myImage: userCredential.user.photoURL,
-          })
-        );
       });
+
+      const { uid, displayName, photoURL } = auth.currentUser;
+      console.log(` auth.currentUser`, auth.currentUser);
+
+      dispatch(
+        updateUserProfile({
+          userId: uid,
+          login: displayName,
+          email,
+          myImage: photoURL,
+        })
+      );
+      // try {
+      //   const userCredential = await createUserWithEmailAndPassword(
+      //     auth,
+      //     email,
+      //     password,
+      //     login
+      //   );
+
+      //   updateProfile(auth.currentUser, {
+      //     displayName: login,
+      //     photoURL: myImage,
+      //   }).then(() => {
+      //     dispatch(
+      //       updateUserProfile({
+      //         userId: userCredential.user.uid,
+      //         login: userCredential.user.displayName,
+      //         email: userCredential.user.email,
+      //         myImage: userCredential.user.photoURL,
+      //       })
+      //     );
+      //   });
+      Alert.alert(`Welcome`);
     } catch (error) {
       Alert.alert(error.message);
       console.log("error.messageOperations", error.message);
@@ -50,9 +70,9 @@ export const authSignInUser =
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        password,
+        password
       );
-        console.log(`userCredential.user`, userCredential.user);
+      Alert.alert(`Welcome`);
     } catch (error) {
       Alert.alert(`${error.message}`);
       console.log("error.message", error.message);
@@ -66,9 +86,8 @@ export const authStateCahngeUser = () => async (dispatch, getState) => {
       const userUpdateProfile = {
         login: user.displayName,
         userId: user.uid,
-        email:user.email,
+        email: user.email,
         myImage: user.photoURL,
-        
       };
 
       dispatch(authStateChange({ stateChange: true }));

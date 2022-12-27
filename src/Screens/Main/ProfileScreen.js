@@ -99,7 +99,7 @@ const ProfileScreen = ({ onLayout, navigation }) => {
               <TouchableOpacity
                 onPress={() => {
                   navigation.navigate("Comments", {
-                    postId: item.id,
+                    postId: item.userId,
                     photo: item.photo,
                   });
                 }}
@@ -107,7 +107,10 @@ const ProfileScreen = ({ onLayout, navigation }) => {
                 <Shape width={24} height={24} />
               </TouchableOpacity>
 
-              <Text style={{ alignSelf: "center", marginRight: 8 }}> Comments </Text>
+              <Text style={{ alignSelf: "center", marginRight: 8 }}>
+                {" "}
+                Comments{" "}
+              </Text>
             </View>
 
             {/* <View style={{ flexDirection: "row" }}>

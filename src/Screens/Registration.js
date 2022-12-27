@@ -2,9 +2,8 @@ import { useTogglePasswordVisibility } from "../assets/useTogglePasswordVisibili
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import Add from "../assets/img/add.svg";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Alert,
   Dimensions,
   ImageBackground,
   Image,
@@ -52,9 +51,6 @@ const Registration = ({ navigation, onLayout }) => {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result.assets[0].uri);
-
     if (!result.canceled) {
       setmyImageUploud(result.assets[0].uri);
     }
@@ -69,15 +65,12 @@ const Registration = ({ navigation, onLayout }) => {
     const response = await fetch(myImageUploud);
     const file = await response.blob();
 
-    const uploadPhoto = await uploadBytes(storageRef, file).then(() => {
-      console.log(`My Image is uploaded`);
-    });
+    const uploadPhoto = await uploadBytes(storageRef, file).then(() => {});
 
     const processedPhoto = await getDownloadURL(
       ref(storage, `avatarImage/${uniquePostId}`)
     )
       .then((url) => {
-        console.log(`url`, url);
         return url;
       })
       .catch((error) => {
@@ -92,9 +85,8 @@ const Registration = ({ navigation, onLayout }) => {
       console.log(`imageRef`, imageRef);
 
       setState((prevState) => ({ ...prevState, myImage: imageRef }));
-      console.log(`state`, state);
       dispatch(authSignUpUser(state));
-      // setState(initialState);
+      //   setState(initialState);
       setIsShowKeyboard(false);
       Keyboard.dismiss();
     } catch (error) {
@@ -107,8 +99,7 @@ const Registration = ({ navigation, onLayout }) => {
     Keyboard.dismiss();
   };
 
-  //   відступ від краю екрану
-  //  параметри екрану
+  //   відступ від краю екрану, параметри екрану
   const [windowWidth, setWindowWidth] = useState(
     Dimensions.get("window").width
   );
@@ -235,7 +226,7 @@ const Registration = ({ navigation, onLayout }) => {
                 onPress={onRegister}
               >
                 <Text style={{ ...styles.btnTitle, fontFamily: "Roboto" }}>
-                  SING UP
+                  SIGN UP
                 </Text>
               </TouchableOpacity>
 

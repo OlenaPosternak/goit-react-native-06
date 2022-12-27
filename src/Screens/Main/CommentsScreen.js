@@ -23,7 +23,7 @@ const CommentsScreen = ({ route }) => {
   const [comment, setComment] = useState("");
   const [allComments, setAllcomments] = useState("");
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  const { login } = useSelector((state) => state.auth);
+  const { login, myImage } = useSelector((state) => state.auth);
 
   //   завантаження коментарів на firebase
   const sendCommentToServer = async () => {
@@ -55,7 +55,7 @@ const CommentsScreen = ({ route }) => {
         setAllcomments(docSnap.docs.map((doc) => ({ ...doc.data() })))
       );
     } catch (error) {
-      console.log(error);
+      console.log(`getAllComents`, error);
     }
   };
 
@@ -77,10 +77,7 @@ const CommentsScreen = ({ route }) => {
           flexDirection: "row",
         }}
       >
-        <Image
-          source={require("../../assets/img/Photo_BG.jpg")}
-          style={styles.imageIcon}
-        />
+        <Image source={{ uri: myImage }} style={styles.imageIcon} />
         <View style={styles.comment}>
           <Text style={{ fontSize: 16 }}>User: {login}</Text>
           <Text>{item.comment}</Text>
@@ -101,6 +98,7 @@ const CommentsScreen = ({ route }) => {
           source={{ uri: photo }}
           style={{ height: 240, borderRadius: 8 }}
         />
+
         <FlatList
           data={allComments}
           keyExtractor={allComments.id}

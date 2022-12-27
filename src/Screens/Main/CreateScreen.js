@@ -70,7 +70,6 @@ export const CreateScreen = ({ onLayout, navigation }) => {
       };
 
       let address = await Location.reverseGeocodeAsync(coords);
-      console.log(`address`, address);
       let city = address[0].city;
       setLocation(locationOfPhoto);
       setCity(city);
@@ -137,11 +136,10 @@ export const CreateScreen = ({ onLayout, navigation }) => {
         userId,
         login,
       });
-      console.log("Document written with ID: ", setUserPost.id);
+      //   console.log("Document written with ID: ", setUserPost.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
-
   };
 
   const sendInfo = () => {
